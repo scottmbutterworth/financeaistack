@@ -1,0 +1,23 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+
+export function PageviewBeacon() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!pathname || pathname.startsWith("/api") || pathname.startsWith("/go")) return;
+    const controller = new AbortController();
+    fetch("/api/pageview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ path: pathname }),
+      keepalive: true,
+      signal: controller.signal,
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [pathname]);
+
+  return null;
+}
