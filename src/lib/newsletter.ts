@@ -24,12 +24,11 @@ export async function buildNewsletterProps(): Promise<NewsletterProps> {
   }));
 
   const sponsor = await getCurrentSponsor();
-  const sponsorName =
-    sponsor.ok && sponsor.data ? sponsor.data.sponsor_name : "this spot is open";
-  const sponsorHref =
-    sponsor.ok && sponsor.data
-      ? absoluteUrl(`/go/${sponsor.data.sponsor_slug}`)
-      : absoluteUrl("/sponsor");
+  const hasSponsor = Boolean(sponsor.ok && sponsor.data);
+  const sponsorName = sponsor.data?.sponsor_name ?? "";
+  const sponsorHref = hasSponsor
+    ? absoluteUrl(`/go/${sponsor.data?.sponsor_slug}`)
+    : absoluteUrl("/sponsor");
 
   return {
     preview: "Five finance tools, one close story, and this week's sponsor.",
@@ -37,6 +36,7 @@ export async function buildNewsletterProps(): Promise<NewsletterProps> {
     storyTitle: FALLBACK_STORY.title,
     storyBody: FALLBACK_STORY.body,
     storyHref: absoluteUrl(FALLBACK_STORY.path),
+    hasSponsor,
     sponsorName,
     sponsorHref,
     siteUrl: siteUrl(),

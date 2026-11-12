@@ -22,6 +22,7 @@ export type NewsletterProps = {
   storyTitle: string;
   storyBody: string;
   storyHref: string;
+  hasSponsor: boolean;
   sponsorName: string;
   sponsorHref: string;
   siteUrl: string;
@@ -33,17 +34,20 @@ export function NewsletterEmail({
   storyTitle,
   storyBody,
   storyHref,
+  hasSponsor,
   sponsorName,
   sponsorHref,
   siteUrl,
 }: NewsletterProps) {
   return (
     <Html lang="en">
-      <Head />
+      <Head>
+        <title>Finance AI Stack</title>
+      </Head>
       <Preview>{preview}</Preview>
       <Body style={body}>
         <Container style={container}>
-          <Text style={kicker}>Finance AI Stack</Text>
+          <Text style={wordmark}>Finance AI Stack</Text>
           <Heading style={heading}>Five things worth a finance team&apos;s time</Heading>
           <Text style={intro}>
             Short picks from the directory. Each line links back to the write-up, including the price source.
@@ -70,10 +74,18 @@ export function NewsletterEmail({
           </Text>
           <Hr style={rule} />
           <Text style={sponsor}>
-            Sponsored by{" "}
-            <Link href={sponsorHref} style={link}>
-              {sponsorName}
-            </Link>
+            {hasSponsor ? (
+              <>
+                Sponsored by{" "}
+                <Link href={sponsorHref} style={link}>
+                  {sponsorName}
+                </Link>
+              </>
+            ) : (
+              <Link href={sponsorHref} style={link}>
+                This spot is open. Sponsor Finance AI Stack
+              </Link>
+            )}
           </Text>
           <Text style={footer}>
             You are on the Finance AI Stack list.{" "}
@@ -104,6 +116,16 @@ const container = {
   margin: "0 auto",
   maxWidth: "560px",
   padding: "28px 28px 20px",
+};
+
+const wordmark = {
+  color: "#1b4332",
+  fontFamily: "Georgia, 'Iowan Old Style', serif",
+  fontSize: "22px",
+  fontWeight: "600",
+  letterSpacing: "-0.02em",
+  lineHeight: "1.2",
+  margin: "0 0 18px",
 };
 
 const kicker = {
