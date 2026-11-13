@@ -75,13 +75,19 @@ async function HomeBody() {
               <li key={item.id}>
                 <a href={item.url}>{item.title}</a>
                 <p className="meta">
-                  {isAustralianSource(item.source) ? <span className="badge badge-au">AU</span> : null} {item.source}
+                  {item.region === "AU" || isAustralianSource(item.source) ? <span className="badge badge-au">AU</span> : null}{" "}
+                  {item.source}
                   {item.published_at ? ` · ${item.published_at.slice(0, 10)}` : ""}
                 </p>
                 {item.why_it_matters ? <p>{item.why_it_matters}</p> : null}
               </li>
             ))}
           </ol>
+        ) : null}
+        {news.data.some((item) => item.via === "newsdata") ? (
+          <p className="meta">
+            <a href="https://newsdata.io">Powered by NewsData.io</a>
+          </p>
         ) : null}
       </section>
 

@@ -62,7 +62,11 @@ export default function AboutPage() {
         and finance or accounting. The same URL is stored once, including when it appears in more than one feed.
       </p>
       <h2>News sources</h2>
-      <p>These feeds returned RSS or Atom when checked on 13 Nov 2026. Australian sources are marked AU.</p>
+      <p>
+        These feeds returned RSS or Atom when checked on 13 Nov 2026. Australian sources are marked AU. When a NewsData.io
+        key is configured, one extra Australian business and technology search is included in the same daily run. Those
+        rows store only the headline, a short snippet, and the original link, and the news page credits NewsData.io.
+      </p>
       <ul>
         {FEEDS.map((feed) => (
           <li key={feed.url}>

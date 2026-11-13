@@ -159,5 +159,8 @@ ALTER TABLE news_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL 
 ALTER TABLE news_items DROP CONSTRAINT IF EXISTS news_items_status_check;
 ALTER TABLE news_items ADD CONSTRAINT news_items_status_check CHECK (status IN ('pending', 'published', 'rejected'));
 
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS region TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS via TEXT;
+
 CREATE UNIQUE INDEX IF NOT EXISTS news_items_url_idx ON news_items (url);
 CREATE INDEX IF NOT EXISTS news_items_status_published_idx ON news_items (status, published_at DESC);

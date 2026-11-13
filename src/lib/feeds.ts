@@ -27,6 +27,7 @@ export const FEEDS: FeedSource[] = [
   { source: "Accountants Daily News", url: "https://www.accountantsdaily.com.au/news?format=feed&type=rss", region: "AU" },
   { source: "CFO Magazine A/NZ", url: "https://cfomagazine.com.au/feed/", region: "AU" },
   { source: "The Conversation Business", url: "https://theconversation.com/au/business/articles.atom", region: "AU" },
+  { source: "Accounting Times Technology", url: "https://www.accountingtimes.com.au/technology?format=feed&type=rss", region: "AU" },
 ];
 
 export function isAustralianSource(source: string) {

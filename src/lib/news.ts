@@ -13,6 +13,8 @@ export type NewsItem = {
   status: string;
   related_slugs: string[];
   created_at: string;
+  region: string | null;
+  via: string | null;
 };
 
 function mapNews(row: Record<string, unknown>): NewsItem {
@@ -27,6 +29,8 @@ function mapNews(row: Record<string, unknown>): NewsItem {
     status: String(row.status),
     related_slugs: Array.isArray(row.related_slugs) ? (row.related_slugs as string[]) : [],
     created_at: row.created_at ? new Date(String(row.created_at)).toISOString() : new Date(0).toISOString(),
+    region: typeof row.region === "string" ? row.region : null,
+    via: typeof row.via === "string" ? row.via : null,
   };
 }
 
@@ -51,7 +55,7 @@ export async function listNews(options: {
       FROM news_items
       WHERE (${status} = 'all' OR status = ${status})
         AND (${sinceDays} = 0 OR COALESCE(published_at, created_at) >= NOW() - (${sinceDays} * INTERVAL '1 day'))
-        AND (${australiaOnly} = FALSE OR source = ANY(${AU_SOURCES}))
+        AND (${australiaOnly} = FALSE OR region = 'AU' OR source = ANY(${AU_SOURCES}))
       ORDER BY COALESCE(published_at, created_at) DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -61,7 +65,7 @@ export async function listNews(options: {
       FROM news_items
       WHERE (${status} = 'all' OR status = ${status})
         AND (${sinceDays} = 0 OR COALESCE(published_at, created_at) >= NOW() - (${sinceDays} * INTERVAL '1 day'))
-        AND (${australiaOnly} = FALSE OR source = ANY(${AU_SOURCES}))
+        AND (${australiaOnly} = FALSE OR region = 'AU' OR source = ANY(${AU_SOURCES}))
     `;
     return { ok: true as const, data: rows.map(mapNews), total: totals[0]?.count ?? 0 };
   } catch (error) {
@@ -81,8 +85,23 @@ export async function ingestNews() {
     feeds.push(report);
     for (const item of report.items) {
       const rows = await sql<{ id: number }[]>`
-        INSERT INTO news_items (source, title, url, published_at, summary, status)
-        VALUES (${feed.source}, ${item.title}, ${item.url}, ${item.publishedAt}, ${item.summary || null}, 'pending')
+        INSERT INTO news_items (source, title, url, published_at, summary, status, region)
+        VALUES (${feed.source}, ${item.title}, ${item.url}, ${item.publishedAt}, ${item.summary || null}, 'pending', ${feed.region ?? null})
+        ON CONFLICT (url) DO NOTHING
+        RETURNING id
+      `;
+      if (rows.length > 0) inserted += 1;
+    }
+  }
+  const newsData = await readNewsData();
+  if (newsData) {
+    feeds.push(newsData);
+    for (const item of newsData.items) {
+      const publisher = item.source;
+      if (!publisher) continue;
+      const rows = await sql<{ id: number }[]>`
+        INSERT INTO news_items (source, title, url, published_at, summary, status, region, via)
+        VALUES (${publisher}, ${item.title}, ${item.url}, ${item.publishedAt}, ${item.summary || null}, 'pending', 'AU', 'newsdata')
         ON CONFLICT (url) DO NOTHING
         RETURNING id
       `;
@@ -110,8 +129,68 @@ type FeedReport = {
   error?: string;
   seen: number;
   kept: number;
-  items: { title: string; url: string; summary: string; publishedAt: string | null }[];
+  items: { title: string; url: string; summary: string; publishedAt: string | null; source?: string }[];
 };
+
+async function readNewsData(): Promise<FeedReport | null> {
+  const key = process.env.NEWSDATA_API_KEY?.trim();
+  if (!key) return null;
+  const endpoint = "https://newsdata.io/api/1/latest";
+  try {
+    const url = new URL(endpoint);
+    url.searchParams.set("apikey", key);
+    url.searchParams.set("country", "au");
+    url.searchParams.set("language", "en");
+    url.searchParams.set("category", "business,technology");
+    url.searchParams.set("q", "AI AND (CFO OR accounting OR accountant OR finance OR financial)");
+    url.searchParams.set("size", "10");
+    const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!response.ok) {
+      return { source: "NewsData.io", url: endpoint, ok: false, error: `HTTP ${response.status}`, seen: 0, kept: 0, items: [] };
+    }
+    const body = (await response.json()) as { results?: unknown };
+    const results = Array.isArray(body.results) ? body.results : [];
+    const items = results.flatMap((raw) => {
+      const row = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : null;
+      if (!row) return [];
+      const title = clip(row.title, 300);
+      const link = typeof row.link === "string" ? row.link.trim() : "";
+      const publisher = clip(row.source_name, 160) || clip(row.source_id, 160);
+      if (!title || !publisher || !/^https?:\/\//i.test(link)) return [];
+      const summary = clip(snippet(row.description), 400);
+      if (!isRelevant(title, summary)) return [];
+      return [{ title, url: link.slice(0, 1000), summary, publishedAt: toIso(row.pubDate), source: publisher }];
+    });
+    return { source: "NewsData.io", url: endpoint, ok: true, seen: results.length, kept: items.length, items };
+  } catch (error) {
+    return {
+      source: "NewsData.io",
+      url: endpoint,
+      ok: false,
+      error: error instanceof Error ? error.message : "NewsData request failed",
+      seen: 0,
+      kept: 0,
+      items: [],
+    };
+  }
+}
+
+function snippet(value: unknown) {
+  if (typeof value !== "string") return "";
+  return value.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+}
+
+function clip(value: unknown, max: number) {
+  if (typeof value !== "string") return "";
+  return value.replace(/\s+/g, " ").trim().slice(0, max);
+}
+
+function toIso(value: unknown) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const normalised = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value.trim()) ? `${value.trim().replace(" ", "T")}Z` : value;
+  const date = new Date(normalised);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
 
 async function readFeed(source: string, url: string): Promise<FeedReport> {
   try {

@@ -30,7 +30,7 @@ export async function GET() {
     ...CATEGORIES.map((category) => `- [${category.name}](${absoluteUrl(`/category/${category.slug}`)}): ${category.blurb}`),
     "",
     "## News sources",
-    "Fetched daily. An item is stored only when it mentions AI and finance or accounting. Duplicate URLs are kept once. Australian sources are marked AU.",
+    "Fetched daily. An item is stored only when it mentions AI and finance or accounting. Duplicate URLs are kept once. Australian sources are marked AU. If NEWSDATA_API_KEY is set, one NewsData.io latest query (Australia, English, business and technology) is added; only the headline, snippet, and link are stored, and the site attributes NewsData.io.",
     ...FEEDS.map((feed) => `- ${feed.region === "AU" ? "AU — " : ""}${feed.source}: ${feed.url}`),
     "",
     "## Stages",

@@ -82,7 +82,8 @@ async function NewsBody({ searchParams }: { searchParams: Promise<{ page?: strin
           <li key={item.id}>
             <article>
               <p className="meta">
-                {isAustralianSource(item.source) ? <span className="badge badge-au">AU</span> : null} {item.source}
+                {item.region === "AU" || isAustralianSource(item.source) ? <span className="badge badge-au">AU</span> : null}{" "}
+                {item.source}
                 {item.published_at ? ` · ${item.published_at.slice(0, 10)}` : ""}
               </p>
               <h2>
@@ -120,6 +121,11 @@ async function NewsBody({ searchParams }: { searchParams: Promise<{ page?: strin
       <p className="meta">
         <a href={absoluteUrl("/news/rss.xml")}>RSS feed of published items</a>
       </p>
+      {news.data.some((item) => item.via === "newsdata") ? (
+        <p className="meta">
+          <a href="https://newsdata.io">Powered by NewsData.io</a>
+        </p>
+      ) : null}
     </>
   );
 }
