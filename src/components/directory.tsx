@@ -57,6 +57,7 @@ export function SkillList({ entries }: { entries: Entry[] }) {
             <strong>{entry.name}</strong>
             <span className="badges">
               <TypeBadge type={entry.item_type} />
+              {entry.original ? <span className="badge badge-original">Original</span> : null}
               <AccessFlag entry={entry} />
               <AuFlag fit={entry.au_fit} />
             </span>

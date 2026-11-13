@@ -44,6 +44,7 @@ function mapEntry(row: Record<string, unknown>): Entry {
     stages: Array.isArray(row.stages) ? (row.stages as string[]) : [],
     australian_relevance: (row.australian_relevance as string | null) ?? null,
     caveat: (row.caveat as string | null) ?? null,
+    original: row.original === true,
   };
 }
 
@@ -254,12 +255,17 @@ export async function recentEntries(days = 7, limit = 8): Promise<DbState<Entry[
   }
 }
 
-export async function listSkills(options: { stage?: string; itemType?: string }): Promise<DbState<Entry[]>> {
+export async function listSkills(options: {
+  stage?: string;
+  itemType?: string;
+  originalOnly?: boolean;
+}): Promise<DbState<Entry[]>> {
   try {
     const sql = await getSql();
     if (!sql) return { ok: false, data: [] };
     const stage = options.stage ?? "";
     const itemType = options.itemType ?? "";
+    const originalOnly = options.originalOnly === true;
     const rows = await sql<Record<string, unknown>[]>`
       SELECT *
       FROM entries
@@ -267,6 +273,7 @@ export async function listSkills(options: { stage?: string; itemType?: string })
         AND kind = 'skill'
         AND (${stage} = '' OR ${stage} = ANY(stages))
         AND (${itemType} = '' OR item_type = ${itemType})
+        AND (${originalOnly} = FALSE OR original = TRUE)
       ORDER BY name ASC
     `;
     return { ok: true, data: rows.map(mapEntry) };

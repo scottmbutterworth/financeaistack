@@ -37,6 +37,7 @@ export type Entry = {
   stages: string[];
   australian_relevance: string | null;
   caveat: string | null;
+  original: boolean;
 };
 
 export type SponsorWeek = {

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import postgres from "postgres";
+import { ORIGINAL_CAVEAT, ORIGINAL_SKILLS, originalGithubTree } from "../src/data/original-skills";
 import { CATALOG, TOOL_COUNT, WORKFLOW_COUNT } from "../src/lib/catalog";
 import "./load-env";
 
@@ -35,6 +36,7 @@ type SkillSeed = {
   australianRelevance: string | null;
   caveat: string | null;
   attachedTo: string | null;
+  original?: boolean;
 };
 
 async function main() {
@@ -45,6 +47,45 @@ async function main() {
   }
 
   const skills = JSON.parse(readFileSync(resolve("src/data/skills.json"), "utf8")) as SkillSeed[];
+  const originals: SkillSeed[] = ORIGINAL_SKILLS.map((skill) => ({
+    slug: skill.slug,
+    kind: "skill",
+    name: skill.name,
+    summary: skill.summary,
+    description: skill.description,
+    descriptionSourceUrl: originalGithubTree(skill.slug),
+    websiteUrl: originalGithubTree(skill.slug),
+    pricingSummary: "No charge. The skill text is in this repository under the MIT licence.",
+    pricingUsd: null,
+    pricingAud: null,
+    pricingSourceUrl: null,
+    pricingCheckedOn: null,
+    howFinanceTeamsUse: skill.howFinanceTeamsUse,
+    categories: skill.categories,
+    steps: null,
+    toolSlugs: [],
+    featured: false,
+    itemType: "skill",
+    itemTypeLabel: "Finance AI Stack original",
+    publisher: "Finance AI Stack",
+    stages: skill.stages,
+    accessLevel: null,
+    accessDetail: "Files you upload",
+    auFit: true,
+    authNote: "No ledger login. The skill reads the files you give it.",
+    securityNotes:
+      "Runs in your own AI tool. Read that tool's terms before you paste a facility agreement, a payroll file, or a board pack.",
+    lastUpdated: "13 Nov 2026",
+    australianRelevance: skill.australianRelevance,
+    caveat: ORIGINAL_CAVEAT,
+    attachedTo: null,
+    original: true,
+  }));
+  const slugs = new Set(skills.map((skill) => skill.slug));
+  for (const skill of originals) {
+    if (slugs.has(skill.slug)) throw new Error(`Original skill slug already used: ${skill.slug}`);
+    skills.push(skill);
+  }
   const known = new Set(CATALOG.filter((entry) => entry.kind === "tool").map((entry) => entry.slug));
   for (const entry of CATALOG) {
     for (const slug of entry.toolSlugs) {
@@ -122,7 +163,7 @@ async function main() {
             pricing_summary, pricing_usd, pricing_aud, pricing_source_url, pricing_checked_on,
             how_finance_teams_use, categories, steps, tool_slugs, featured, published,
             item_type, item_type_detail, publisher, access_level, access_detail, au_fit,
-            auth_note, security_notes, last_updated, stages, australian_relevance, caveat, updated_at
+            auth_note, security_notes, last_updated, stages, australian_relevance, caveat, original, updated_at
           ) VALUES (
             ${skill.slug},
             ${"skill"},
@@ -154,6 +195,7 @@ async function main() {
             ${skill.stages},
             ${skill.australianRelevance},
             ${skill.caveat},
+            ${skill.original === true},
             NOW()
           )
           ON CONFLICT (slug) DO UPDATE SET
@@ -186,6 +228,7 @@ async function main() {
             stages = EXCLUDED.stages,
             australian_relevance = EXCLUDED.australian_relevance,
             caveat = EXCLUDED.caveat,
+            original = EXCLUDED.original,
             updated_at = NOW()
         `;
       }

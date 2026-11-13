@@ -245,7 +245,18 @@ button:hover, .button:hover { background: #143528; color: white; }
 .bad { background: #fdecec; border-color: #f0c2c2; color: var(--danger); }
 
 .prose { max-width: 42rem; }
+.prose.skill-page { max-width: 48rem; }
 .prose p { margin: 0.45rem 0 0.7rem; }
+.skill-doc { margin-top: 1rem; }
+.skill-doc h2, .skill-doc h3, .skill-doc h4 { font-family: var(--serif); line-height: 1.25; }
+.skill-doc table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0.6rem 0 1rem; }
+.skill-doc th, .skill-doc td { border: 1px solid var(--line); padding: 0.35rem 0.45rem; vertical-align: top; text-align: left; }
+.skill-doc pre { overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem; }
+.skill-doc code { font-size: 0.9em; }
+.skill-doc blockquote { margin: 0.6rem 0; padding-left: 0.8rem; border-left: 3px solid var(--line); color: var(--muted); }
+.skill-actions { display: flex; flex-wrap: wrap; gap: 0.6rem 0.9rem; align-items: center; }
+.skill-actions .button, .skill-actions button { margin-top: 0; }
+.badge-original { background: var(--brass); color: #fffaf3; }
 .meta { color: var(--muted); font-size: 0.88rem; }
 ol.steps { margin: 0.4rem 0 0; padding-left: 1.2rem; }
 ol.steps li { margin: 0 0 0.75rem; }

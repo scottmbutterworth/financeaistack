@@ -1,4 +1,6 @@
 import { CATEGORIES, categoryName } from "@/lib/categories";
+import { ORIGINAL_SKILLS } from "@/data/original-skills";
+import { listSkillFiles, readSkillFile } from "@/lib/skill-files";
 import { listSkills, searchEntries } from "@/lib/queries";
 import { accessLabel, stageName } from "@/lib/skills";
 import { absoluteUrl } from "@/lib/site";
@@ -30,12 +32,36 @@ export async function GET() {
     lines.push("## Workflows", "");
     for (const entry of workflows.data) lines.push(block(entry), "");
   }
+  const seen = new Set(skills.ok ? skills.data.map((entry) => entry.slug) : []);
+  const missing = ORIGINAL_SKILLS.filter((skill) => !seen.has(skill.slug) || !skills.data.find((entry) => entry.slug === skill.slug && entry.original));
+  if (missing.length > 0) {
+    lines.push("## Original skill files", "");
+    for (const skill of missing) {
+      lines.push(
+        `### ${skill.name}`,
+        `URL: ${absoluteUrl(`/skills/${skill.slug}`)}`,
+        `Summary: ${skill.summary}`,
+        originalSkillText(skill.slug),
+        "",
+      );
+    }
+  }
   return new Response(lines.join("\n"), {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": available ? "public, s-maxage=3600, stale-while-revalidate=86400" : "no-store",
     },
   });
+}
+
+function originalSkillText(slug: string) {
+  return listSkillFiles(slug)
+    .map((name) => {
+      const body = readSkillFile(slug, name);
+      return body ? `\n#### ${name}\n\n${body}` : "";
+    })
+    .filter(Boolean)
+    .join("\n");
 }
 
 function block(entry: Entry) {
@@ -56,6 +82,8 @@ function block(entry: Entry) {
     entry.pricing_checked_on ? `Checked: ${entry.pricing_checked_on}` : "",
     entry.access_detail ? `Access: ${accessLabel(entry.access_level, entry.access_detail)}` : "",
     entry.au_fit === true ? "AU fit: yes" : entry.au_fit === false ? "AU fit: no" : "",
+    entry.original ? "Original: Finance AI Stack" : "",
+    entry.original ? originalSkillText(entry.slug) : "",
     entry.description_source_url ? `Description source: ${entry.description_source_url}` : "",
     entry.security_notes ? `Security notes: ${entry.security_notes}` : "",
   ]

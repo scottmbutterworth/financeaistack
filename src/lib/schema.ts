@@ -13,6 +13,10 @@ export function softwareApplication(entry: Entry) {
     url: entry.website_url || absoluteUrl(entry.kind === "skill" ? `/skills/${entry.slug}` : `/tools/${entry.slug}`),
   };
   if (entry.publisher) data.publisher = { "@type": "Organization", name: entry.publisher };
+  if (entry.original) {
+    data.license = "https://opensource.org/license/mit";
+    data.isAccessibleForFree = true;
+  }
   if (entry.pricing_checked_on) data.dateModified = entry.pricing_checked_on;
   const offer = publishedOffer(entry);
   if (offer) data.offers = offer;

@@ -5,6 +5,7 @@ import { itemList } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 import { SKILL_TYPES, STAGES, VETTING } from "@/lib/skills";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -42,6 +43,9 @@ async function SkillsBody({ searchParams }: { searchParams: Promise<Query> }) {
         )}
       />
       <h1>Skills and plugins</h1>
+      <p>
+        <Link href="/skills/originals">Finance AI Stack originals</Link> are the five skills written for this directory.
+      </p>
       <p className="lede">
         Connectors, skills, and apps a finance team can add to the tools they already run. Vetted for quality and
         security on {VETTING.checkedOn}. Prices are only what the publisher has printed.

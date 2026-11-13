@@ -122,6 +122,7 @@ ALTER TABLE entries ADD COLUMN IF NOT EXISTS last_updated TEXT;
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS stages TEXT[] NOT NULL DEFAULT '{}';
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS australian_relevance TEXT;
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS caveat TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS original BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE INDEX IF NOT EXISTS entries_kind_idx ON entries (kind);
 CREATE INDEX IF NOT EXISTS entries_published_idx ON entries (published);

@@ -127,7 +127,11 @@ async function HomeBody() {
       <section>
         <div className="section-head">
           <h2>Skills and connectors</h2>
-          <Link href="/skills">All skills</Link>
+          <span>
+            <Link href="/skills/originals">Originals</Link>
+            {" · "}
+            <Link href="/skills">All skills</Link>
+          </span>
         </div>
         <p className="lede">Vetted for quality and security. Each card shows access and whether it is flagged for Australia.</p>
         {skills.ok && skills.data.length === 0 ? <p className="meta">No skills are published yet.</p> : null}
