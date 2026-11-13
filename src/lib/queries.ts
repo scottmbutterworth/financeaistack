@@ -126,12 +126,12 @@ export async function getEntriesBySlugs(slugs: string[]): Promise<DbState<Entry[
   }
 }
 
-export async function listPublishedPaths(): Promise<{ kind: string; slug: string }[]> {
+export async function listPublishedPaths(): Promise<{ kind: string; slug: string; updated_at: Date | string | null }[]> {
   try {
     const sql = await getSql();
     if (!sql) return [];
-    const rows = await sql<{ kind: string; slug: string }[]>`
-      SELECT kind, slug FROM entries WHERE published = TRUE ORDER BY slug
+    const rows = await sql<{ kind: string; slug: string; updated_at: Date | string | null }[]>`
+      SELECT kind, slug, updated_at FROM entries WHERE published = TRUE ORDER BY slug
     `;
     return rows;
   } catch (error) {
@@ -230,6 +230,27 @@ export async function publicStats() {
     if (isPrerenderInterrupt(error)) throw error;
     await logError(error, "public-stats");
     return empty;
+  }
+}
+
+export async function recentEntries(days = 7, limit = 8): Promise<DbState<Entry[]>> {
+  try {
+    const sql = await getSql();
+    if (!sql) return { ok: false, data: [] };
+    const rows = await sql<Record<string, unknown>[]>`
+      SELECT *
+      FROM entries
+      WHERE published = TRUE
+        AND kind IN ('tool', 'skill')
+        AND created_at >= NOW() - (${days} * INTERVAL '1 day')
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `;
+    return { ok: true, data: rows.map(mapEntry) };
+  } catch (error) {
+    if (isPrerenderInterrupt(error)) throw error;
+    await logError(error, "recentEntries");
+    return { ok: false, data: [] };
   }
 }
 

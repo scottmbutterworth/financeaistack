@@ -1,5 +1,7 @@
 import { DbNotice, TagList } from "@/components/directory";
+import { Breadcrumbs, JsonLd } from "@/components/structured";
 import { getEntriesBySlugs, getEntry } from "@/lib/queries";
+import { howTo } from "@/lib/schema";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,7 +15,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!entry.data || entry.data.kind !== "workflow") {
     return { title: "Workflow", description: "A finance workflow using AI tools." };
   }
-  return { title: entry.data.name, description: entry.data.summary };
+  return {
+    title: entry.data.name,
+    description: entry.data.summary,
+    alternates: { canonical: `/workflows/${entry.data.slug}` },
+  };
 }
 
 export default function WorkflowPage({ params }: { params: Promise<Params> }) {
@@ -36,9 +42,8 @@ async function WorkflowBody({ params }: { params: Promise<Params> }) {
 
   return (
     <article className="prose">
-      <p className="meta">
-        <Link href="/workflows">Workflows</Link>
-      </p>
+      <Breadcrumbs items={[{ name: "Workflows", href: "/workflows" }, { name: entry.name, href: `/workflows/${entry.slug}` }]} />
+      <JsonLd data={howTo(entry)} />
       <h1>{entry.name}</h1>
       <p className="lede">{entry.summary}</p>
       <TagList categories={entry.categories} />

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
-export function SignupForm({ compact = false }: { compact?: boolean }) {
+export function SignupForm({ compact = false, idPrefix = "signup" }: { compact?: boolean; idPrefix?: string }) {
   const [status, setStatus] = useState<string | null>(null);
   const [tone, setTone] = useState<"ok" | "bad">("ok");
 
@@ -31,9 +31,9 @@ export function SignupForm({ compact = false }: { compact?: boolean }) {
   return (
     <form onSubmit={onSubmit}>
       {compact ? null : <p>One short email a week. Five tools, one story, and the sponsor line.</p>}
-      <label htmlFor={compact ? "signup-email-c" : "signup-email"}>Email</label>
+      <label htmlFor={`${idPrefix}-email`}>Email</label>
       <input
-        id={compact ? "signup-email-c" : "signup-email"}
+        id={`${idPrefix}-email`}
         name="email"
         type="email"
         autoComplete="email"
@@ -41,8 +41,8 @@ export function SignupForm({ compact = false }: { compact?: boolean }) {
         placeholder="you@company.com"
       />
       <div className="hp" aria-hidden="true">
-        <label htmlFor="leave_blank">Leave this blank</label>
-        <input id="leave_blank" name="leave_blank" tabIndex={-1} autoComplete="off" />
+        <label htmlFor={`${idPrefix}-leave`}>Leave this blank</label>
+        <input id={`${idPrefix}-leave`} name="leave_blank" tabIndex={-1} autoComplete="off" />
       </div>
       <button type="submit">Get the weekly note</button>
       {status ? <p className={tone === "ok" ? "ok notice" : "bad notice"}>{status}</p> : null}

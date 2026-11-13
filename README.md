@@ -23,6 +23,7 @@ Copy `.env.example` to `.env.local`.
 | `RESEND_API_KEY` | For email | Resend API key |
 | `RESEND_AUDIENCE_ID` | For the list | Resend **segment** id. Audiences were replaced by segments; this variable still holds that id |
 | `ADMIN_TOKEN` | For admin | Bearer token for `/api/admin/*` |
+| `CRON_SECRET` | For the daily news fetch | Vercel sends this as a Bearer token to `/api/cron/news`. The route also accepts `ADMIN_TOKEN` |
 | `OWNER_EMAIL` | For sponsor mail | Inbox that receives “Get in touch” emails |
 | `FROM_EMAIL` | For sending | Verified sender, for example `Finance AI Stack <news@financeaistack.com>` |
 | `NEXT_PUBLIC_SITE_URL` | Optional | Public origin. Defaults to `https://financeaistack.com` |

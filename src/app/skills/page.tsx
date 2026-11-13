@@ -1,5 +1,8 @@
 import { DbNotice, SkillList } from "@/components/directory";
+import { Breadcrumbs, JsonLd } from "@/components/structured";
 import { listSkills } from "@/lib/queries";
+import { itemList } from "@/lib/schema";
+import { absoluteUrl } from "@/lib/site";
 import { SKILL_TYPES, STAGES, VETTING } from "@/lib/skills";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -8,6 +11,7 @@ export const metadata: Metadata = {
   title: "Skills and plugins",
   description:
     "Vetted AI skills, plugins, and MCP connectors for finance teams, filterable by the job in the close and by type.",
+  alternates: { canonical: "/skills" },
 };
 
 type Query = { stage?: string; type?: string };
@@ -30,6 +34,13 @@ async function SkillsBody({ searchParams }: { searchParams: Promise<Query> }) {
 
   return (
     <>
+      <Breadcrumbs items={[{ name: "Skills", href: "/skills" }]} />
+      <JsonLd
+        data={itemList(
+          "Skills and plugins",
+          skills.data.map((entry) => ({ name: entry.name, url: absoluteUrl(`/skills/${entry.slug}`) })),
+        )}
+      />
       <h1>Skills and plugins</h1>
       <p className="lede">
         Connectors, skills, and apps a finance team can add to the tools they already run. Vetted for quality and

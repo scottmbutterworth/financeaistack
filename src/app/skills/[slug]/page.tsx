@@ -1,5 +1,8 @@
 import { AccessFlag, AuFlag, DbNotice, TagList, TypeBadge } from "@/components/directory";
+import { AnswerBlock, Breadcrumbs, JsonLd } from "@/components/structured";
+import { answerForEntry } from "@/lib/answers";
 import { getEntriesBySlugs, getEntry } from "@/lib/queries";
+import { softwareApplication } from "@/lib/schema";
 import { accessLabel, stageName } from "@/lib/skills";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -14,7 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!entry.data || entry.data.kind !== "skill") {
     return { title: "Skill", description: "A vetted finance skill, plugin, or connector." };
   }
-  return { title: entry.data.name, description: entry.data.summary };
+  return {
+    title: entry.data.name,
+    description: entry.data.summary,
+    alternates: { canonical: `/skills/${entry.data.slug}` },
+  };
 }
 
 export default function SkillPage({ params }: { params: Promise<Params> }) {
@@ -44,12 +51,19 @@ async function SkillBody({ params }: { params: Promise<Params> }) {
     : null;
   const access = accessLabel(entry.access_level, entry.access_detail);
 
+  const answer = answerForEntry(entry);
   return (
     <article className="prose">
-      <p className="meta">
-        <Link href="/skills">Skills and plugins</Link>
-      </p>
+      <Breadcrumbs items={[{ name: "Skills", href: "/skills" }, { name: entry.name, href: `/skills/${entry.slug}` }]} />
+      <JsonLd data={softwareApplication(entry)} />
       <h1>{entry.name}</h1>
+      <AnswerBlock
+        what={answer.what}
+        best={answer.best}
+        australia={answer.australia}
+        checked={checked}
+        sourceUrl={entry.description_source_url || entry.pricing_source_url}
+      />
       <p className="badges" style={{ justifyContent: "flex-start", margin: "0.4rem 0 0.6rem" }}>
         <TypeBadge type={entry.item_type} />
         <AccessFlag entry={entry} />

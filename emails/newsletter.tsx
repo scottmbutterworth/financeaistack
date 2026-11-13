@@ -16,9 +16,12 @@ export type NewsletterPick = {
   href: string;
 };
 
+export type NewsletterNews = { title: string; href: string; line: string };
+
 export type NewsletterProps = {
   preview: string;
   picks: NewsletterPick[];
+  news: NewsletterNews[];
   storyTitle: string;
   storyBody: string;
   storyHref: string;
@@ -34,6 +37,7 @@ export function NewsletterEmail({
   storyTitle,
   storyBody,
   storyHref,
+  news,
   hasSponsor,
   sponsorName,
   sponsorHref,
@@ -61,6 +65,21 @@ export function NewsletterEmail({
               {pick.line}
             </Text>
           ))}
+          {news.length > 0 ? (
+            <>
+              <Hr style={rule} />
+              <Text style={kicker}>This week in finance AI</Text>
+              {news.slice(0, 5).map((item) => (
+                <Text key={item.href} style={pickLine}>
+                  <Link href={item.href} style={link}>
+                    {item.title}
+                  </Link>
+                  {" — "}
+                  {item.line}
+                </Text>
+              ))}
+            </>
+          ) : null}
           <Hr style={rule} />
           <Text style={kicker}>How a finance team did it</Text>
           <Heading as="h2" style={storyHeading}>

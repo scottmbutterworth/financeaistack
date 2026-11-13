@@ -1,7 +1,9 @@
 import { DbNotice, SkillList, TagList } from "@/components/directory";
+import { AnswerBlock, Breadcrumbs, JsonLd } from "@/components/structured";
+import { answerForEntry } from "@/lib/answers";
 import { getEntry, skillsForTool } from "@/lib/queries";
+import { softwareApplication } from "@/lib/schema";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -13,7 +15,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!entry.data || entry.data.kind !== "tool") {
     return { title: "Tool", description: "An AI tool for finance teams." };
   }
-  return { title: entry.data.name, description: entry.data.summary };
+  return {
+    title: entry.data.name,
+    description: entry.data.summary,
+    alternates: { canonical: `/tools/${entry.data.slug}` },
+  };
 }
 
 export default function ToolPage({ params }: { params: Promise<Params> }) {
@@ -43,12 +49,19 @@ async function ToolBody({ params }: { params: Promise<Params> }) {
       })
     : null;
 
+  const answer = answerForEntry(entry);
   return (
     <article className="prose">
-      <p className="meta">
-        <Link href="/">Directory</Link>
-      </p>
+      <Breadcrumbs items={[{ name: entry.name, href: `/tools/${entry.slug}` }]} />
+      <JsonLd data={softwareApplication(entry)} />
       <h1>{entry.name}</h1>
+      <AnswerBlock
+        what={answer.what}
+        best={answer.best}
+        australia={answer.australia}
+        checked={checked}
+        sourceUrl={entry.description_source_url || entry.pricing_source_url}
+      />
       <p className="lede">{entry.summary}</p>
       <TagList categories={entry.categories} />
       <h2>What it does</h2>

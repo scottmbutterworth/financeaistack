@@ -132,3 +132,32 @@ CREATE INDEX IF NOT EXISTS pageviews_path_idx ON pageviews (path);
 CREATE INDEX IF NOT EXISTS sponsor_clicks_slug_idx ON sponsor_clicks (sponsor_slug);
 CREATE INDEX IF NOT EXISTS zero_result_searches_created_idx ON zero_result_searches (created_at);
 CREATE INDEX IF NOT EXISTS submissions_status_idx ON submissions (status, created_at);
+
+CREATE TABLE IF NOT EXISTS news_items (
+  id BIGSERIAL PRIMARY KEY,
+  source TEXT NOT NULL,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL UNIQUE,
+  published_at TIMESTAMPTZ,
+  summary TEXT,
+  why_it_matters TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'published', 'rejected')),
+  related_slugs TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS source TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS url TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS summary TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS why_it_matters TEXT;
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS related_slugs TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE news_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+ALTER TABLE news_items DROP CONSTRAINT IF EXISTS news_items_status_check;
+ALTER TABLE news_items ADD CONSTRAINT news_items_status_check CHECK (status IN ('pending', 'published', 'rejected'));
+
+CREATE UNIQUE INDEX IF NOT EXISTS news_items_url_idx ON news_items (url);
+CREATE INDEX IF NOT EXISTS news_items_status_published_idx ON news_items (status, published_at DESC);

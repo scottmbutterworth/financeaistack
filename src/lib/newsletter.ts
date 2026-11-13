@@ -1,5 +1,6 @@
 import { NewsletterEmail, type NewsletterProps } from "../../emails/newsletter";
 import { CATALOG } from "@/lib/catalog";
+import { listNews } from "@/lib/news";
 import { getCurrentSponsor, searchEntries } from "@/lib/queries";
 import { absoluteUrl, siteUrl } from "@/lib/site";
 import { Resend } from "resend";
@@ -23,6 +24,7 @@ export async function buildNewsletterProps(): Promise<NewsletterProps> {
     href: absoluteUrl(`/tools/${entry.slug}`),
   }));
 
+  const news = await listNews({ status: "published", limit: 5, sinceDays: 7 });
   const sponsor = await getCurrentSponsor();
   const hasSponsor = Boolean(sponsor.ok && sponsor.data);
   const sponsorName = sponsor.data?.sponsor_name ?? "";
@@ -36,6 +38,11 @@ export async function buildNewsletterProps(): Promise<NewsletterProps> {
     storyTitle: FALLBACK_STORY.title,
     storyBody: FALLBACK_STORY.body,
     storyHref: absoluteUrl(FALLBACK_STORY.path),
+    news: news.data.map((item) => ({
+      title: item.title,
+      href: item.url,
+      line: item.why_it_matters || item.summary || item.source,
+    })),
     hasSponsor,
     sponsorName,
     sponsorHref,

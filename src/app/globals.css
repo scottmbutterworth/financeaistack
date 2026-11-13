@@ -300,6 +300,33 @@ ol.steps strong { font-family: var(--serif); }
   .footer .wrap { grid-template-columns: 1.4fr 1fr; align-items: start; }
 }
 
+.hero h1 { font-size: 1.85rem; max-width: 16ch; margin-top: 0.2rem; }
+.kicker-label { margin: 0; color: var(--green); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.hero-grid { display: grid; gap: 0.8rem; }
+.hero-search { margin-top: 0.6rem; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.news-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.news-list h2 { font-size: 1.15rem; margin: 0.15rem 0; }
+.news-list article, .news-list li { border-top: 1px solid var(--line); padding-top: 0.7rem; }
+.stage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+.stage-grid a { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem; color: inherit; text-decoration: none; font-family: var(--serif); }
+.stage-grid a:hover { border-color: #b7d0c3; }
+.answer { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 0.9rem; margin: 0.6rem 0 1rem; }
+.answer p { margin: 0.35rem 0; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; padding: 0; margin: 0 0 0.5rem; color: var(--muted); font-size: 0.82rem; }
+.crumbs li { display: flex; gap: 0.35rem; }
+.table-wrap { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+table.data th, table.data td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 0.45rem 0.4rem; }
+table.data caption { text-align: left; font-family: var(--serif); font-size: 1.05rem; margin-bottom: 0.4rem; }
+.sponsor-slot { margin-top: 1rem; }
+
+@media (min-width: 800px) {
+  .hero h1 { font-size: 3rem; }
+  .hero-grid { grid-template-columns: 1.4fr 0.8fr; align-items: end; gap: 1.4rem; }
+  .stage-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
 @media (max-width: 640px) {
   .brand small, .nav a[data-desk] { display: none; }
   .nav { font-size: 0.82rem; gap: 0.4rem 0.6rem; flex-wrap: wrap; justify-content: flex-end; }

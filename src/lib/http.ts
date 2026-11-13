@@ -23,6 +23,20 @@ export function requireAdmin(request: Request) {
   return timingSafeEqual(a, b);
 }
 
+export function bearerMatches(request: Request, secret: string | undefined) {
+  if (!secret) return false;
+  const header = request.headers.get("authorization") ?? "";
+  const got = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : "";
+  const a = Buffer.from(got);
+  const b = Buffer.from(secret);
+  if (a.length !== b.length || a.length === 0) return false;
+  return timingSafeEqual(a, b);
+}
+
+export function cronOrAdmin(request: Request) {
+  return bearerMatches(request, process.env.CRON_SECRET) || requireAdmin(request);
+}
+
 export function unauthorized() {
   return Response.json({ error: "Unauthorised." }, { status: 401 });
 }
