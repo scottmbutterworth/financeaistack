@@ -1,4 +1,4 @@
-import { FEEDS } from "@/lib/feeds";
+import { AU_SOURCES, FEEDS } from "@/lib/feeds";
 import { getSql, isPrerenderInterrupt, logError } from "@/lib/db";
 import { isRelevant, parseFeed } from "@/lib/rss";
 
@@ -30,7 +30,13 @@ function mapNews(row: Record<string, unknown>): NewsItem {
   };
 }
 
-export async function listNews(options: { status?: string; limit?: number; offset?: number; sinceDays?: number }) {
+export async function listNews(options: {
+  status?: string;
+  limit?: number;
+  offset?: number;
+  sinceDays?: number;
+  region?: string;
+}) {
   const empty = { ok: false as const, data: [] as NewsItem[], total: 0 };
   try {
     const sql = await getSql();
@@ -39,11 +45,13 @@ export async function listNews(options: { status?: string; limit?: number; offse
     const limit = options.limit ?? 20;
     const offset = options.offset ?? 0;
     const sinceDays = options.sinceDays ?? 0;
+    const australiaOnly = options.region === "au";
     const rows = await sql<Record<string, unknown>[]>`
       SELECT *
       FROM news_items
       WHERE (${status} = 'all' OR status = ${status})
         AND (${sinceDays} = 0 OR COALESCE(published_at, created_at) >= NOW() - (${sinceDays} * INTERVAL '1 day'))
+        AND (${australiaOnly} = FALSE OR source = ANY(${AU_SOURCES}))
       ORDER BY COALESCE(published_at, created_at) DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -53,6 +61,7 @@ export async function listNews(options: { status?: string; limit?: number; offse
       FROM news_items
       WHERE (${status} = 'all' OR status = ${status})
         AND (${sinceDays} = 0 OR COALESCE(published_at, created_at) >= NOW() - (${sinceDays} * INTERVAL '1 day'))
+        AND (${australiaOnly} = FALSE OR source = ANY(${AU_SOURCES}))
     `;
     return { ok: true as const, data: rows.map(mapNews), total: totals[0]?.count ?? 0 };
   } catch (error) {

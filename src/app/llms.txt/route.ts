@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/categories";
+import { FEEDS } from "@/lib/feeds";
 import { listSkills, searchEntries } from "@/lib/queries";
 import { STAGES } from "@/lib/skills";
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site";
@@ -27,6 +28,10 @@ export async function GET() {
     "",
     "## Categories",
     ...CATEGORIES.map((category) => `- [${category.name}](${absoluteUrl(`/category/${category.slug}`)}): ${category.blurb}`),
+    "",
+    "## News sources",
+    "Fetched daily. An item is stored only when it mentions AI and finance or accounting. Duplicate URLs are kept once. Australian sources are marked AU.",
+    ...FEEDS.map((feed) => `- ${feed.region === "AU" ? "AU — " : ""}${feed.source}: ${feed.url}`),
     "",
     "## Stages",
     ...STAGES.map((stage) => `- [${stage.name}](${absoluteUrl(`/compare/${stage.slug}`)}): comparison table`),

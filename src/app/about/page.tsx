@@ -1,4 +1,5 @@
 import { Breadcrumbs, FaqBlock } from "@/components/structured";
+import { FEEDS } from "@/lib/feeds";
 import { VETTING } from "@/lib/skills";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -57,8 +58,19 @@ export default function AboutPage() {
       <p>
         Price lines stay as published on the checked date printed on the record. News sources are fetched daily at
         19:00 UTC, which is 6am in Sydney during Australian summer. New stories land as pending. They appear on the
-        site only after a curation note is written.
+        site only after a curation note is written. A story is kept only when the headline or summary mentions both AI
+        and finance or accounting. The same URL is stored once, including when it appears in more than one feed.
       </p>
+      <h2>News sources</h2>
+      <p>These feeds returned RSS or Atom when checked on 13 Nov 2026. Australian sources are marked AU.</p>
+      <ul>
+        {FEEDS.map((feed) => (
+          <li key={feed.url}>
+            {feed.region === "AU" ? "AU — " : ""}
+            <a href={feed.url}>{feed.source}</a>
+          </li>
+        ))}
+      </ul>
       <h2>Corrections</h2>
       <p>
         If a price, access note, or description is wrong, send the vendor page that shows the correction through the{" "}

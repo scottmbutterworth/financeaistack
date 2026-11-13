@@ -1,6 +1,7 @@
 import { EntryList, SkillList } from "@/components/directory";
 import { SignupForm } from "@/components/signup-form";
 import { getCurrentSponsor, recentEntries, searchEntries } from "@/lib/queries";
+import { isAustralianSource } from "@/lib/feeds";
 import { listNews } from "@/lib/news";
 import { STAGES } from "@/lib/skills";
 import type { Metadata } from "next";
@@ -74,7 +75,7 @@ async function HomeBody() {
               <li key={item.id}>
                 <a href={item.url}>{item.title}</a>
                 <p className="meta">
-                  {item.source}
+                  {isAustralianSource(item.source) ? <span className="badge badge-au">AU</span> : null} {item.source}
                   {item.published_at ? ` · ${item.published_at.slice(0, 10)}` : ""}
                 </p>
                 {item.why_it_matters ? <p>{item.why_it_matters}</p> : null}
