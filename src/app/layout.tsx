@@ -41,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </Link>
           <nav className="nav" aria-label="Site">
             <Link href="/workflows">Workflows</Link>
+            <Link href="/skills">Skills</Link>
             <Link href="/search">Search</Link>
             <Link href="/submit" data-desk="true">
               Submit

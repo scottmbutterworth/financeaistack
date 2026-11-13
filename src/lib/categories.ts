@@ -39,6 +39,36 @@ export const CATEGORIES = [
     name: "General assistants",
     blurb: "The chat tools finance teams use to draft, check, and ask questions of a file.",
   },
+  {
+    slug: "accounts-receivable",
+    name: "Accounts receivable",
+    blurb: "Invoices out, collections, and the cash customers still owe.",
+  },
+  {
+    slug: "payroll",
+    name: "Payroll",
+    blurb: "Pay runs, employees, and the journals that follow.",
+  },
+  {
+    slug: "treasury-and-cash",
+    name: "Treasury and cash",
+    blurb: "Bank balances, cash position, and the short-term forecast.",
+  },
+  {
+    slug: "working-capital",
+    name: "Working capital",
+    blurb: "Receivables, payables, and the cash tied up between them.",
+  },
+  {
+    slug: "capital-management",
+    name: "Capital management",
+    blurb: "Cap tables, funding, and how the business is capitalised.",
+  },
+  {
+    slug: "risk-and-controls",
+    name: "Risk and controls",
+    blurb: "Controls, governance, and where the risk actually sits.",
+  },
 ] as const;
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];

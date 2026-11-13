@@ -107,9 +107,26 @@ ALTER TABLE signups ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 ALTER TABLE sponsor_inquiries ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 ALTER TABLE errors ADD COLUMN IF NOT EXISTS digest TEXT;
 
+ALTER TABLE entries DROP CONSTRAINT IF EXISTS entries_kind_check;
+ALTER TABLE entries ADD CONSTRAINT entries_kind_check CHECK (kind IN ('tool', 'workflow', 'skill'));
+
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS item_type TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS item_type_detail TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS publisher TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS access_level TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS access_detail TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS au_fit BOOLEAN;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS auth_note TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS security_notes TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS last_updated TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS stages TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS australian_relevance TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS caveat TEXT;
+
 CREATE INDEX IF NOT EXISTS entries_kind_idx ON entries (kind);
 CREATE INDEX IF NOT EXISTS entries_published_idx ON entries (published);
 CREATE INDEX IF NOT EXISTS entries_categories_idx ON entries USING GIN (categories);
+CREATE INDEX IF NOT EXISTS entries_stages_idx ON entries USING GIN (stages);
 CREATE INDEX IF NOT EXISTS pageviews_created_at_idx ON pageviews (created_at);
 CREATE INDEX IF NOT EXISTS pageviews_path_idx ON pageviews (path);
 CREATE INDEX IF NOT EXISTS sponsor_clicks_slug_idx ON sponsor_clicks (sponsor_slug);

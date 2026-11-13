@@ -25,7 +25,7 @@ async function SearchBody({ searchParams }: { searchParams: Promise<Query> }) {
   const params = await searchParams;
   const q = (params.q ?? "").trim().slice(0, 120);
   const category = CATEGORIES.some((item) => item.slug === params.category) ? params.category ?? "" : "";
-  const kind = params.kind === "tool" || params.kind === "workflow" ? params.kind : "";
+  const kind = params.kind === "tool" || params.kind === "workflow" || params.kind === "skill" ? params.kind : "";
   const results = await searchEntries({
     q,
     category,
@@ -51,9 +51,10 @@ async function SearchBody({ searchParams }: { searchParams: Promise<Query> }) {
           ))}
         </select>
         <select name="kind" defaultValue={kind} aria-label="Type">
-          <option value="">Tools and workflows</option>
+          <option value="">All</option>
           <option value="tool">Tools</option>
           <option value="workflow">Workflows</option>
+          <option value="skill">Skills and plugins</option>
         </select>
         <button type="submit">Search</button>
       </form>

@@ -1,4 +1,4 @@
-export type EntryKind = "tool" | "workflow";
+export type EntryKind = "tool" | "workflow" | "skill";
 
 export type WorkflowStep = {
   title: string;
@@ -25,6 +25,18 @@ export type Entry = {
   tool_slugs: string[];
   featured: boolean;
   published: boolean;
+  item_type: string | null;
+  item_type_detail: string | null;
+  publisher: string | null;
+  access_level: string | null;
+  access_detail: string | null;
+  au_fit: boolean | null;
+  auth_note: string | null;
+  security_notes: string | null;
+  last_updated: string | null;
+  stages: string[];
+  australian_relevance: string | null;
+  caveat: string | null;
 };
 
 export type SponsorWeek = {

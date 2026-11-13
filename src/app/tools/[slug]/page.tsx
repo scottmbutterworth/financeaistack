@@ -1,5 +1,5 @@
-import { DbNotice, TagList } from "@/components/directory";
-import { getEntry } from "@/lib/queries";
+import { DbNotice, SkillList, TagList } from "@/components/directory";
+import { getEntry, skillsForTool } from "@/lib/queries";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -28,7 +28,7 @@ export default function ToolPage({ params }: { params: Promise<Params> }) {
 
 async function ToolBody({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const result = await getEntry(slug);
+  const [result, related] = await Promise.all([getEntry(slug), skillsForTool(slug)]);
   if (!result.ok) {
     return <DbNotice ok={false} empty={false} />;
   }
@@ -79,6 +79,16 @@ async function ToolBody({ params }: { params: Promise<Params> }) {
       </p>
       <h2>How finance teams use it</h2>
       <p>{entry.how_finance_teams_use}</p>
+      {related.data.length > 0 ? (
+        <>
+          <h2>AI connectors and skills</h2>
+          <p className="meta">
+            Vetted connectors and skills for this product. Each one links to its own page, with the access level and the
+            source.
+          </p>
+          <SkillList entries={related.data} />
+        </>
+      ) : null}
       {entry.website_url ? (
         <p>
           <a className="button" href={entry.website_url} rel="noreferrer">

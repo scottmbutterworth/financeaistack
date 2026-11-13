@@ -15,7 +15,7 @@ function mapEntry(row: Record<string, unknown>): Entry {
   return {
     id: Number(row.id),
     slug: String(row.slug),
-    kind: row.kind === "workflow" ? "workflow" : "tool",
+    kind: row.kind === "workflow" ? "workflow" : row.kind === "skill" ? "skill" : "tool",
     name: String(row.name),
     summary: String(row.summary),
     description: String(row.description),
@@ -32,6 +32,18 @@ function mapEntry(row: Record<string, unknown>): Entry {
     tool_slugs: Array.isArray(row.tool_slugs) ? (row.tool_slugs as string[]) : [],
     featured: Boolean(row.featured),
     published: Boolean(row.published),
+    item_type: (row.item_type as string | null) ?? null,
+    item_type_detail: (row.item_type_detail as string | null) ?? null,
+    publisher: (row.publisher as string | null) ?? null,
+    access_level: (row.access_level as string | null) ?? null,
+    access_detail: (row.access_detail as string | null) ?? null,
+    au_fit: typeof row.au_fit === "boolean" ? row.au_fit : null,
+    auth_note: (row.auth_note as string | null) ?? null,
+    security_notes: (row.security_notes as string | null) ?? null,
+    last_updated: (row.last_updated as string | null) ?? null,
+    stages: Array.isArray(row.stages) ? (row.stages as string[]) : [],
+    australian_relevance: (row.australian_relevance as string | null) ?? null,
+    caveat: (row.caveat as string | null) ?? null,
   };
 }
 
@@ -42,7 +54,7 @@ function likePattern(query: string) {
 export async function searchEntries(options: {
   q?: string;
   category?: string;
-  kind?: "tool" | "workflow";
+  kind?: "tool" | "workflow" | "skill";
   featured?: boolean;
   limit?: number;
 }): Promise<DbState<Entry[]>> {
@@ -218,6 +230,49 @@ export async function publicStats() {
     if (isPrerenderInterrupt(error)) throw error;
     await logError(error, "public-stats");
     return empty;
+  }
+}
+
+export async function listSkills(options: { stage?: string; itemType?: string }): Promise<DbState<Entry[]>> {
+  try {
+    const sql = await getSql();
+    if (!sql) return { ok: false, data: [] };
+    const stage = options.stage ?? "";
+    const itemType = options.itemType ?? "";
+    const rows = await sql<Record<string, unknown>[]>`
+      SELECT *
+      FROM entries
+      WHERE published = TRUE
+        AND kind = 'skill'
+        AND (${stage} = '' OR ${stage} = ANY(stages))
+        AND (${itemType} = '' OR item_type = ${itemType})
+      ORDER BY name ASC
+    `;
+    return { ok: true, data: rows.map(mapEntry) };
+  } catch (error) {
+    if (isPrerenderInterrupt(error)) throw error;
+    await logError(error, "listSkills");
+    return { ok: false, data: [] };
+  }
+}
+
+export async function skillsForTool(toolSlug: string): Promise<DbState<Entry[]>> {
+  try {
+    const sql = await getSql();
+    if (!sql) return { ok: false, data: [] };
+    const rows = await sql<Record<string, unknown>[]>`
+      SELECT *
+      FROM entries
+      WHERE published = TRUE
+        AND kind = 'skill'
+        AND ${toolSlug} = ANY(tool_slugs)
+      ORDER BY name ASC
+    `;
+    return { ok: true, data: rows.map(mapEntry) };
+  } catch (error) {
+    if (isPrerenderInterrupt(error)) throw error;
+    await logError(error, `skills:${toolSlug}`);
+    return { ok: false, data: [] };
   }
 }
 

@@ -35,19 +35,27 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const category = getCategory(slug);
   if (!category) notFound();
-  const [tools, workflows] = await Promise.all([
+  const [tools, workflows, skills] = await Promise.all([
     searchEntries({ kind: "tool", category: slug }),
     searchEntries({ kind: "workflow", category: slug }),
+    searchEntries({ kind: "skill", category: slug }),
   ]);
+  const empty = tools.data.length === 0 && workflows.data.length === 0 && skills.data.length === 0;
 
   return (
     <>
       <CategoryLinks current={slug} />
       <h1>{category.name}</h1>
       <p className="lede">{category.blurb}</p>
-      <DbNotice ok={tools.ok} empty={tools.ok && tools.data.length === 0 && workflows.data.length === 0} />
+      <DbNotice ok={tools.ok && skills.ok} empty={tools.ok && empty} />
       <h2>Tools</h2>
-      <EntryList entries={tools.data} />
+      {tools.data.length === 0 ? <p className="meta">No tool in this category yet.</p> : <EntryList entries={tools.data} />}
+      <h2>Connectors and skills</h2>
+      {skills.data.length === 0 ? (
+        <p className="meta">No vetted connector or skill in this category yet.</p>
+      ) : (
+        <EntryList entries={skills.data} />
+      )}
       <h2>Workflows</h2>
       {workflows.data.length === 0 ? <p className="meta">No workflow in this category yet.</p> : <EntryList entries={workflows.data} />}
     </>
